@@ -1,5 +1,6 @@
 library midtrans_snap;
 
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -8,20 +9,26 @@ import 'package:midtrans_snap/models.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 class MidtransSnap extends StatelessWidget {
-  MidtransSnap({
-    super.key,
-    required this.mode,
-    required this.token,
-    required this.midtransClientKey,
-    this.onPageStarted,
-    this.onPageFinished,
-    this.onResponse,
-  });
+  MidtransSnap(
+      {super.key,
+      required this.mode,
+      required this.token,
+      required this.midtransClientKey,
+      this.onPageStarted,
+      this.onPageFinished,
+      this.onResponse,
+      this.onNavigationRequest,
+      this.onProgress,
+      this.onWebResourceError});
 
   final MidtransEnvironment mode;
   final String token, midtransClientKey;
   final void Function(String url)? onPageStarted, onPageFinished;
   final void Function(MidtransResponse result)? onResponse;
+  final void Function(WebResourceError error)? onWebResourceError;
+  final void Function(int progress)? onProgress;
+  final FutureOr<NavigationDecision> Function(NavigationRequest request)?
+      onNavigationRequest;
 
   static PlatformWebViewControllerCreationParams _getCreationParams() {
     return const PlatformWebViewControllerCreationParams();
@@ -41,7 +48,7 @@ class MidtransSnap extends StatelessWidget {
         ..setNavigationDelegate(
           NavigationDelegate(
             onProgress: (int progress) {
-              // Update loading bar.
+              onProgress?.call(progress);
             },
             onPageStarted: (String url) {
               onPageStarted?.call(url);
@@ -49,8 +56,13 @@ class MidtransSnap extends StatelessWidget {
             onPageFinished: (String url) {
               onPageFinished?.call(url);
             },
-            onWebResourceError: (WebResourceError error) {},
+            onWebResourceError: (WebResourceError error) {
+              onWebResourceError?.call(error);
+            },
             onNavigationRequest: (NavigationRequest request) {
+              if (onNavigationRequest != null) {
+                return onNavigationRequest!.call(request);
+              }
               return NavigationDecision.navigate;
             },
           ),
