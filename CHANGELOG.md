@@ -1,3 +1,8 @@
+## 1.0.1 - [2024-03-02]
+
+* Upgrade intl to v0.19.0
+* Upgrade toolkit to v0.3.3
+
 ## 1.0.0 - [2023-10-22]
 
 * Add callback `onNavigationRequest`, `onProgress`, `onWebResourceError`
